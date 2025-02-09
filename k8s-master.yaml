@@ -7,6 +7,10 @@
   become: true
 
   tasks:
+    - name: Get Kubernetes join command
+      shell: kubeadm token create --print-join-command
+      register: kubeadm_join_cmd
+
     - name: Add Kubernetes apt-key
       get_url:
         url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
