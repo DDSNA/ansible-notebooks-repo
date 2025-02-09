@@ -4,26 +4,47 @@
   tasks:
     - name: Install containerd
       apt:
-        name: ['containerd.io']
+        name: 'containerd.io'
         state: latest
         update_cache: yes
       
-    - name: Config containerd
-      shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null && sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+    - name: Config containerd part 1
+      shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
+    
+    - name: Config containerd part 2
+      shell: sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+    
+    - name: Restart containerd
+      service:
+        name: containerd
+        state: restarted
 
     - name: Configure worker nodes to join Kubernetes cluster
       hosts: kube_node
       become: true
       tasks:
-        - name: Add Kubernetes GPG key
-          apt_key:
-            url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        - name: Add Kubernetes apt-key
+          get_url:
+            url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+            dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+            mode: "0644"
+            force: true
+
+        - name: Install APT Transport HTTPS
+          apt:
+            name: apt-transport-https
             state: present
 
-        - name: Add Kubernetes repository
+        - name: Add Kubernetes APT repository
           apt_repository:
-            repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+            repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
             state: present
+            update_cache: yes
+
+        - name: Update package cache
+          apt:
+            update_cache: yes
+            cache_valid_time: 3600
 
         - name: Install kubeadm and kubelet
           apt:
