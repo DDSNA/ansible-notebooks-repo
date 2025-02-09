@@ -60,5 +60,9 @@
         name: ['kubeadm', 'kubelet']
         state: present
 
+    - name: Debug hostvars for master
+      debug:
+        var: hostvars['master']
+
     - name: Join Kubernetes cluster
-      command: "{{ hostvars['master']['kubeadm_join_cmd'][0] }}"
+      command: "{{ hostvars['master']['kubeadm_join_cmd'] }}"
