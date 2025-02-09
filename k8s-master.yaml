@@ -17,10 +17,6 @@
         url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
         dest: /etc/apt/keyrings/kubernetes.asc
         mode: '0644'
-        force_basic_auth: yes
-        retries: 3
-        delay: 5
-        status_code: 200
 
     - name: Add Kubernetes repository
       apt_repository:
