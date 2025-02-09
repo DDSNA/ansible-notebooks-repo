@@ -25,7 +25,6 @@
           https://apt.kubernetes.io/
           stable main
         state: present
-        cache_valid_time: 3600
 
     - name: Update package cache
       apt:
