@@ -25,7 +25,7 @@
 
     - name: Set join command as a fact
       set_fact:
-        kubeadm_join_cmd: "{{ kubeadm_join_cmd.stdout_lines }}"
+        kubeadm_join_cmd: "{{ kubeadm_join_cmd.stdout }}"
 
 
 - name: Configure worker nodes to join Kubernetes cluster
