@@ -36,9 +36,16 @@
         state: latest
         update_cache: yes
 
-    - name: Config containerd
-      shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null && sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-
+    - name: Config containerd part 1
+      shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
+    
+    - name: Config containerd part 2
+      shell: sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+    
+    - name: Restart containerd
+      service:
+        name: containerd
+        state: restarted
 
     - name: Install kubeadm, kubelet, and kubectl with latest versions
       apt:
