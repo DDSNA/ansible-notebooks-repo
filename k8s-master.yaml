@@ -14,17 +14,18 @@
 
     - name: Download Kubernetes GPG key
       get_url:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
         dest: /etc/apt/keyrings/kubernetes.asc
         mode: '0644'
 
     - name: Add Kubernetes repository
       apt_repository:
         repo: >-
-          deb [signed-by=/etc/apt/keyrings/kubernetes.asc]
-          https://apt.kubernetes.io/
+          deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg]
+          https://pkgs.k8s.io/core:/stable:/v1.28/deb/
           stable main
         state: present
+        update_cache: yes
 
     - name: Update package cache
       apt:
