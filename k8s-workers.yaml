@@ -1,0 +1,26 @@
+- name: Set up Kubernetes control-plane
+  hosts: master
+  become: true
+  tasks:
+    - name: Add Kubernetes GPG key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+
+    - name: Install kubeadm, kubelet, and kubectl
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: present
+
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: kubeadm_output
+
+    - name: Save the kubeadm join command for worker nodes
+      set_fact:
+        kubeadm_join_cmd: "{{ kubeadm_output.stdout_lines | select('search', 'kubeadm join') | list }}"

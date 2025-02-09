@@ -1,0 +1,45 @@
+# TODO: Configure either containerd or docker as the container runtime
+# TODO: containerd sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null && sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+# TODO: docker setup equivalent to containerd steps WARN I found out this was in fact deprecated! :o
+# DEBIAN MACHINES ONLY! NO UBUNTU!
+- name: Set up Kubernetes control-plane
+  hosts: master
+  become: true
+
+  tasks:
+    - name: Install containerd
+      apt:
+        name: ['containerd.io']
+        state: latest
+        update_cache: yes
+    
+    - name: Config containerd
+      shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null && sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+
+    - name: Add Kubernetes GPG key
+      shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        state: present
+        filename: kubernetes.list
+
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install kubeadm, kubelet, and kubectl with latest versions
+      apt:
+        name: ['kubeadm', 'kubelet', 'kubectl']
+        state: latest
+        update_cache: yes
+
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: kubeadm_output
+
+    - name: Save the kubeadm join command for worker nodes
+      set_fact:
+        kubeadm_join_cmd: "{{ kubeadm_output.stdout_lines | select('search', 'kubeadm join') | list }}"
