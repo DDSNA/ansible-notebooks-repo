@@ -13,7 +13,7 @@
         dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
         mode: "0644"
         force: true
-        
+
     - name: Install APT Transport HTTPS
       apt:
         name: apt-transport-https
@@ -35,30 +35,6 @@
         name: containerd.io
         state: latest
         update_cache: yes
-    - name: Configure modules for containerd
-      blockinfile:
-        path: /etc/modules-load.d/containerd.conf
-        block: |
-          overlay
-          br_netfilter
-
-    - name: Create an empty file for K8S sysctl parameters
-      copy:
-        content: ""
-        dest: /etc/sysctl.d/99-kubernetes-cri.conf
-        force: no
-
-    - name: Configure sysctl parameters for K8S
-      lineinfile:
-        path: /etc/sysctl.d/99-kubernetes-cri.conf
-        line: "{{ item }}"
-      with_items:
-        - "net.bridge.bridge-nf-call-iptables  = 1"
-        - "net.ipv4.ip_forward                 = 1"
-        - "net.bridge.bridge-nf-call-ip6tables = 1"
-
-    - name: Apply sysctl parameters
-      command: sysctl --system
 
     - name: Config containerd
       shell: sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null && sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
