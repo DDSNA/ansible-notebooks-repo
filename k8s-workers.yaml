@@ -19,37 +19,37 @@
         name: containerd
         state: restarted
 
-    - name: Configure worker nodes to join Kubernetes cluster
-      hosts: kube_node
-      become: true
-      tasks:
-        - name: Add Kubernetes apt-key
-          get_url:
-            url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
-            dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
-            mode: "0644"
-            force: true
+- name: Configure worker nodes to join Kubernetes cluster
+  hosts: kube_node
+  become: true
+  tasks:
+    - name: Add Kubernetes apt-key
+      get_url:
+        url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
+        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+        mode: "0644"
+        force: true
 
-        - name: Install APT Transport HTTPS
-          apt:
-            name: apt-transport-https
-            state: present
+    - name: Install APT Transport HTTPS
+      apt:
+        name: apt-transport-https
+        state: present
 
-        - name: Add Kubernetes APT repository
-          apt_repository:
-            repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
-            state: present
-            update_cache: yes
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+        state: present
+        update_cache: yes
 
-        - name: Update package cache
-          apt:
-            update_cache: yes
-            cache_valid_time: 3600
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
 
-        - name: Install kubeadm and kubelet
-          apt:
-            name: ['kubeadm', 'kubelet']
-            state: present
+    - name: Install kubeadm and kubelet
+      apt:
+        name: ['kubeadm', 'kubelet']
+        state: present
 
-        - name: Join Kubernetes cluster
-          command: "{{ hostvars['master']['kubeadm_join_cmd'][0] }}"
+    - name: Join Kubernetes cluster
+      command: "{{ hostvars['master']['kubeadm_join_cmd'][0] }}"
