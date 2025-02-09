@@ -19,6 +19,10 @@
         name: containerd
         state: restarted
 
+    - name: Get Kubernetes join command
+      shell: kubeadm token create --print-join-command
+      register: kubeadm_join_cmd
+
 - name: Configure worker nodes to join Kubernetes cluster
   hosts: kube_node
   become: true
