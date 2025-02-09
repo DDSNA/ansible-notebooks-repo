@@ -57,10 +57,18 @@
         state: latest
         update_cache: yes
 
+    - name: Set permissions to kube config for master user
+      shell: sudo chmod 644 /etc/kubernetes/admin.conf
+
     - name: Initialize Kubernetes cluster
       command: kubeadm init --pod-network-cidr=10.244.0.0/16
       register: kubeadm_output
 
+    - name: Set ownership over administrative config of Kubernetes
+      shell: sudo chmod 644 /etc/kubernetes/admin.conf
+
+    - name: Export kubeconfig location as variable
+      shell: export KUBECONFIG=/etc/kubernetes/admin.conf
     - name: Save the kubeadm join command for worker nodes
       set_fact:
         kubeadm_join_cmd: "{{ kubeadm_output.stdout_lines | select('search', 'kubeadm join') | list }}"
