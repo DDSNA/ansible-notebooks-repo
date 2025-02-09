@@ -27,7 +27,7 @@
       apt_repository:
         repo: >-
           deb [signed-by=/etc/apt/keyrings/kubernetes.asc]
-          https://pkgs.k8s.io/core:/stable:/v1.32/deb/
+          https://apt.kubernetes.io/
           stable main
         state: present
 
